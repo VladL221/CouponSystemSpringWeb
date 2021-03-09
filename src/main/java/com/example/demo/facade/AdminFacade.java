@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.Exceptions.CustomException;
@@ -45,7 +46,7 @@ public class AdminFacade implements ClientFacade {
 	// adds the company all the validators are on the bean class.
 	public void addCompany(Company company) throws ExistsException, CustomException {
 		if (companyRepo.findByName(company.getName()) == null) {
-			companyRepo.save(emailCheckComp(company));
+			companyRepo.save(company);
 		} else {
 			throw new ExistsException(company.getName(), company.getCompanyID(),
 					" The company that you tried to add already exists");
@@ -54,13 +55,13 @@ public class AdminFacade implements ClientFacade {
 
 	// updates only either the email or password. validators are on the bean class
 	public void updateCompany(Company company) throws NotExistsException, CustomException {
-		Company comp2 = companyRepo.findByName(company.getName());
+		Company comp2 = companyRepo.findById(company.getCompanyID()).orElse(null);
 		System.out.println(comp2);
 		if (comp2 != null) {
 			
 			comp2.setEmail(company.getEmail());
 			comp2.setPassword(company.getPassword());
-			companyRepo.save(emailCheckComp(comp2));
+			companyRepo.save(comp2);
 
 		} else {
 			throw new NotExistsException(company.getName(), company.getCompanyID(),
@@ -124,7 +125,7 @@ public class AdminFacade implements ClientFacade {
 
 	//adds a customer. validators are on the bean class
 	public void addCustomer(Customer customer) throws CustomException {
-		customerRepo.save(emailCheckCust(customer));
+		customerRepo.save(customer);
 	}
 
 	// deletes the cutomer as well as the purchase history of the customer and increases the amount of the coupons by 1
@@ -156,7 +157,7 @@ public class AdminFacade implements ClientFacade {
 			throw new NotExistsException(customer.getFirstName(), customer.getCustomerID(),
 					"This customer does not exist");
 		}
-		customerRepo.save(emailCheckCust(custard));
+		customerRepo.save(custard);
 	}
 
 	//gets all the customers
@@ -183,27 +184,6 @@ public class AdminFacade implements ClientFacade {
 		}
 		return false;
 
-	}
-
-	
-	public Customer emailCheckCust(Customer customer) throws CustomException {
-		List<Customer> customers = customerRepo.findAll();
-		for (Customer cust : customers) {
-			if(cust.getEmail().equals(customer.getEmail())) {
-				throw new CustomException("Email already exist!");
-			}
-		}
-		return customer;	
-	}
-	
-	public Company emailCheckComp(Company company) throws CustomException {
-		List<Company> companies = companyRepo.findAll();
-		for (Company comp : companies) {
-			if(comp.getEmail().equals(company.getEmail())) {
-				throw new CustomException("Email already exist!");
-			}
-		}
-		return company;	
 	}
 	
 	

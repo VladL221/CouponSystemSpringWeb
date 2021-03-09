@@ -20,9 +20,30 @@ public class Logger {
 
 	private double amount;
 
+	private int statusCode;
+
+	private String methodType;
+
+	public Logger(String methodType, Date executionDate, int statusCode,String clientType, int clientId) {
+		this.clientId = clientId;
+		this.clientType = clientType;
+		this.executionDate = executionDate;
+		this.statusCode = statusCode;
+		this.methodType = methodType;
+	}
+
+	public Logger(int clientId, String methodType, Date executionDate, String clientType) {
+		this.clientId = clientId;
+		this.clientType = clientType;
+		this.executionDate = executionDate;
+		this.methodType = methodType;
+	}
+
 	public Logger() {
 		super();
 	}
+
+
 
 	public Logger(int clientId, String clientType, Date executionDate, String description, double amount) {
 		super();
@@ -31,6 +52,22 @@ public class Logger {
 		this.executionDate = executionDate;
 		this.description = description;
 		this.amount = amount;
+	}
+
+	public void setStatusCode(int statusCode) {
+		this.statusCode = statusCode;
+	}
+
+	public String getMethodType() {
+		return methodType;
+	}
+
+	public void setMethodType(String methodType) {
+		this.methodType = methodType;
+	}
+
+	public int getStatusCode() {
+		return statusCode;
 	}
 
 	public int getClientId() {

@@ -1,7 +1,9 @@
 package com.example.demo.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,26 +14,20 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.example.demo.Exceptions.CustomException;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 @Entity
 @Table(name = "companies")
 public class Company {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int CompanyID;
+	private int companyID;
 	@Column(nullable = false, unique = true)
 	private String name;
 	@Column(nullable = false, unique = true)
 	private String email;
 	@Column(nullable = false)
 	private String password;
+	@JsonIgnore
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "company")
 	private List<Coupon> coupons;
 
@@ -39,8 +35,9 @@ public class Company {
 
 	}
 
-	public Company(String name, String email, String password) {
+	public Company( int companyID,String name, String email, String password) {
 		super();
+		this.companyID = companyID;
 		this.name = name;
 		this.email = email;
 		this.password = password;
@@ -80,45 +77,30 @@ public class Company {
 	}
 
 	public int getCompanyID() {
-		return CompanyID;
+		return companyID;
+	}
+
+
+	@Override
+	public String toString() {
+		return "Company{" +
+				"companyID=" + companyID +
+				", name='" + name + '\'' +
+				", email='" + email + '\'' +
+				", password='" + password + '\'' +
+				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Company company = (Company) o;
+		return companyID == company.companyID && name.equals(company.name) && email.equals(company.email) && password.equals(company.password) && coupons.equals(company.coupons);
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + CompanyID;
-		result = prime * result + ((email == null) ? 0 : email.hashCode());
-		result = prime * result + ((password == null) ? 0 : password.hashCode());
-		return result;
+		return Objects.hash(companyID, name, email, password, coupons);
 	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!(obj instanceof Company))
-			return false;
-		Company other = (Company) obj;
-		if (CompanyID != other.CompanyID)
-			return false;
-		if (email == null) {
-			if (other.email != null)
-				return false;
-		} else if (!email.equals(other.email))
-			return false;
-		if (password == null) {
-			if (other.password != null)
-				return false;
-		} else if (!password.equals(other.password))
-			return false;
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "Company [CompanyID=" + CompanyID + ", name=" + name + ", email=" + email + ", password=" + password
-				+ "]";
-	}
-
 }

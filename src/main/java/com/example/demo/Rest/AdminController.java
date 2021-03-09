@@ -1,9 +1,12 @@
 package com.example.demo.Rest;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
+import com.example.demo.beans.ClientType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +49,7 @@ public class AdminController {
 	// Token Checker:
 	// First check if the token exists and if it matches the client facade.
 	// Second check the last activity of the logged in user.
-	public AdminFacade tokenCheck(String token) {
+	private AdminFacade tokenCheck(String token) {
 		SessionInfo sessionInfo = manager.getSessions().get(token);
 		if (manager.getSessions().containsKey(token) && sessionInfo.getFacade() instanceof AdminFacade) {
 			long endTime = System.currentTimeMillis(); // Get another time to compare last activity.
@@ -72,7 +75,7 @@ public class AdminController {
 			facade = tokenCheck(token);
 			if (facade != null) {
 				facade.addCompany(company);
-				return ResponseEntity.ok(company);
+				return ResponseEntity.status(HttpStatus.CREATED).build();
 			} else
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized user!");
 		} catch (Exception e) {
@@ -83,12 +86,12 @@ public class AdminController {
 	// Update company.
 	// If it fails, throw an exception from the AdminFacade updateCompany().
 	@PutMapping("update/company/{token}")
-	public ResponseEntity<String> updateCompany(@PathVariable String token, @RequestBody Company company) {
+	public ResponseEntity<?> updateCompany(@PathVariable String token, @RequestBody Company company) {
 		try {
 			facade = tokenCheck(token);
 			if (facade != null) {
 				facade.updateCompany(company);
-				return  ResponseEntity.ok("successfull");
+				return  ResponseEntity.status(HttpStatus.OK).body("Updated");
 			} else
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized user!");
 		} catch (Exception e) {
@@ -152,7 +155,7 @@ public class AdminController {
 			facade = tokenCheck(token);
 			if (facade != null) {
 				facade.addCustomer(customer);
-				return ResponseEntity.status(HttpStatus.OK).body(customer);
+				return ResponseEntity.status(HttpStatus.CREATED).build();
 			} else {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized user!");
 			}
@@ -164,12 +167,12 @@ public class AdminController {
 	// Update customer.
 	// If it fails, throw an exception from the AdminFacade updateCustomer().
 	@PutMapping("update/customer/{token}")
-	public ResponseEntity<String> updateCustomer(@PathVariable String token, @RequestBody Customer customer) {
+	public ResponseEntity<?> updateCustomer(@PathVariable String token, @RequestBody Customer customer) {
 		try {
 			facade = tokenCheck(token);
 			if (facade != null) {
 				facade.updateCustomer(customer);
-				return ResponseEntity.ok("Customer updated successfully");
+				return ResponseEntity.status(200).body("Updated");
 			} else
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized user!");
 		} catch (Exception e) {
@@ -295,6 +298,30 @@ public class AdminController {
 		} else {
 			return new ResponseEntity<String>("Wrong login!", HttpStatus.UNAUTHORIZED);
 		}
+	}
+
+	@Async
+	@GetMapping("/getAllAdminLogs/{token}")
+	CompletableFuture<?> getAllAdminLogs(@PathVariable String token){
+		facade = tokenCheck(token);
+		if(facade != null){
+			RestTemplate restTemplate = new RestTemplate();
+			return CompletableFuture.completedFuture(restTemplate.getForEntity("http://localhost:8082/adminLogger/getAllLogs",List.class)).thenApply(body -> body.getBody());
+		}
+		return null;
+	}
+
+	@Async
+	@GetMapping("/getAllAdminLogsByType/{token}/{type}")
+	CompletableFuture<?> getAllAdminLogsByType(@PathVariable String token, @PathVariable ClientType type){
+		facade = tokenCheck(token);
+		RestTemplate restTemplate;
+		if(facade != null){
+			restTemplate = new RestTemplate();
+//			ResponseEntity<?> entity = restTemplate.getForEntity(String.format("http://localhost:8082/adminLogger/%s",type.getValue()),List.class);
+			return CompletableFuture.completedFuture(restTemplate.getForEntity(String.format("http://localhost:8082/adminLogger/%s",type.getValue()),List.class)).thenApply(body -> body.getBody());
+		}
+		return null;
 	}
 
 }

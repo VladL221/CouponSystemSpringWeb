@@ -2,6 +2,7 @@ package com.example.demo.thread;
 
 import java.sql.Date;
 
+import com.example.demo.facade.AdminFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -72,7 +73,7 @@ public class LoggerUpdateThread implements Runnable{
 					System.out.println(e.getMessage());
 					// suppose to send to admin if user might get coupon but not pay
 				}
-			}else {
+			}else if(facade instanceof AdminFacade){
 				// suppose to send to admin if user might get coupon but not pay
 			}
 		} else {

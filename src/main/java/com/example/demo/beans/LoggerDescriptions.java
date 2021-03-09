@@ -5,8 +5,14 @@ public enum LoggerDescriptions {
 	couponPurchase("Coupon purchased"),
 	couponCreation("Coupon created"),
 	couponUpdate("Coupon updated"),
-	couponRemove("Coupon Removed");
-	
+	couponRemove("Coupon Removed"),
+	deleteCompany("Company removed"),
+	deleteCustomer("Customer removed"),
+	addCompany("Company added"),
+	addCustomer("Customer added"),
+	updateCompany("Company updated"),
+	updateCustomer("Customer Updated");
+
 	
 	private String value;
 	
